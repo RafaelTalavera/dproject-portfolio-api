@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v1/members/employee-[0-9a-fA-F-]{36}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "jsonBody": {
+      "id": "{{request.pathSegments.[3]}}",
+      "name": "Funcionário cadastrado",
+      "assignment": "funcionário"
+    }
+  }
+}
