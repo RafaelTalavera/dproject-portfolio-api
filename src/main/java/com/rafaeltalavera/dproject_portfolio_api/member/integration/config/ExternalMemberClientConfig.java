@@ -10,10 +10,7 @@ import org.springframework.web.client.RestClient;
 public class ExternalMemberClientConfig {
 
     @Bean("externalMemberRestClient")
-    RestClient externalMemberRestClient(
-            RestClient.Builder restClientBuilder,
-            ExternalMemberClientProperties properties
-    ) {
-        return restClientBuilder.baseUrl(properties.baseUrl().toString()).build();
+    RestClient externalMemberRestClient(ExternalMemberClientProperties properties) {
+        return RestClient.builder().baseUrl(properties.baseUrl().toString()).build();
     }
 }
