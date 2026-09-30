@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.List;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
@@ -66,4 +68,30 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
             @Param("risk") String risk,
             Pageable pageable
     );
+
+    @Query(value = """
+            SELECT status AS status, COUNT(*) AS projectCount, COALESCE(SUM(total_budget), 0) AS totalBudget
+            FROM portfolio.projects
+            GROUP BY status
+            ORDER BY status
+            """, nativeQuery = true)
+    List<PortfolioStatusAggregate> summarizeByStatus();
+
+    @Query(value = """
+            SELECT AVG(actual_end_date - start_date)
+            FROM portfolio.projects
+            WHERE status = 'CLOSED' AND actual_end_date IS NOT NULL
+            """, nativeQuery = true)
+    BigDecimal calculateAverageClosedDurationDays();
+
+    @Query(value = "SELECT COUNT(DISTINCT member_id) FROM portfolio.project_members", nativeQuery = true)
+    long countDistinctAllocatedMembers();
+
+    interface PortfolioStatusAggregate {
+        String getStatus();
+
+        long getProjectCount();
+
+        BigDecimal getTotalBudget();
+    }
 }
