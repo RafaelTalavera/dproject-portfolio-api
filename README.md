@@ -77,7 +77,7 @@ funcionário, nos campos `managerExternalId` e `memberExternalIds` do projeto.
 
 ## Testes
 
-Na valida&ccedil;&atilde;o de encerramento realizada em 2026-09-30, a suite passou e o relat&oacute;rio JaCoCo registrou 78,40% de cobertura de instru&ccedil;&otilde;es, acima da meta de 70% para as regras de neg&oacute;cio do desafio.
+Na valida&ccedil;&atilde;o de encerramento realizada em 2026-09-30, a suite passou e o relat&oacute;rio JaCoCo registrou 80,15% de cobertura de instru&ccedil;&otilde;es, acima da meta de 70% para as regras de neg&oacute;cio do desafio.
 
 ```bash
 ./mvnw clean test

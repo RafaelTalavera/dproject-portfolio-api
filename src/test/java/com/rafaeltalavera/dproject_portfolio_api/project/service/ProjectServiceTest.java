@@ -228,6 +228,39 @@ class ProjectServiceTest {
     }
 
     @Test
+    void shouldUpdateAllocatedMembersAndManager() {
+        Project project = project(ProjectStatus.PLANNED);
+        UUID projectId = UUID.randomUUID();
+        when(projectRepository.findByIdForUpdate(projectId)).thenReturn(Optional.of(project));
+
+        Project updated = projectService.update(projectId, new UpdateProjectRequest(
+                "Projeto atualizado", LocalDate.of(2026, 10, 1), LocalDate.of(2027, 1, 1), null,
+                new BigDecimal("250000.00"), "Descrição atualizada", "employee-002",
+                List.of("employee-001", "employee-002")
+        ));
+
+        assertThat(updated.getManager()).isSameAs(developer);
+        assertThat(updated.getMembers()).containsExactlyInAnyOrder(manager, developer);
+    }
+
+    @Test
+    void shouldRejectNewMemberAtActiveProjectLimitWhenUpdating() {
+        Member memberAtLimit = member("employee-003", "funcionário");
+        Project project = project(ProjectStatus.PLANNED);
+        UUID projectId = UUID.randomUUID();
+        when(projectRepository.findByIdForUpdate(projectId)).thenReturn(Optional.of(project));
+        when(memberRepository.findByExternalId("employee-003")).thenReturn(Optional.of(memberAtLimit));
+        when(projectRepository.countActiveProjectsByMemberId(memberAtLimit.getId())).thenReturn(3L);
+
+        assertThatThrownBy(() -> projectService.update(projectId, new UpdateProjectRequest(
+                "Projeto atualizado", LocalDate.of(2026, 10, 1), LocalDate.of(2027, 1, 1), null,
+                new BigDecimal("250000.00"), "Descrição atualizada", "employee-001",
+                List.of("employee-001", "employee-003")
+        ))).isInstanceOf(ProjectBusinessRuleException.class)
+                .hasMessage("Um membro não pode estar alocado em mais de três projetos ativos.");
+    }
+
+    @Test
     void shouldRejectDeletionForBlockedStatus() {
         Project project = project(ProjectStatus.STARTED);
         UUID projectId = UUID.randomUUID();
