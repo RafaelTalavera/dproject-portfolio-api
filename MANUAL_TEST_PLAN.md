@@ -76,8 +76,8 @@ ANALYSIS -> ANALYSIS_COMPLETED -> ANALYSIS_APPROVED -> STARTED -> PLANNED -> IN_
 | CLOSED sem data real ou data anterior | `422` |
 | DELETE em ANALYSIS, PLANNED ou CANCELED | `204` |
 | DELETE em STARTED, IN_PROGRESS ou CLOSED | `422` |
-| CANCELED em estado n&atilde;o terminal | aceito; depois pode excluir |
-| Transi&ccedil;&atilde;o ap&oacute;s CLOSED/CANCELED | `422` |
+| CANCELED em qualquer estado, inclusive CLOSED | aceito; depois pode excluir |
+| Transi&ccedil;&atilde;o ap&oacute;s CANCELED | `422` |
 
 ## Limites, relat&oacute;rio e auditoria
 

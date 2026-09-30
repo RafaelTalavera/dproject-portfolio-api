@@ -28,7 +28,7 @@ class ProjectStatusTransitionPolicyTest {
     }
 
     @Test
-    void shouldAllowCancellationFromAnyNonTerminalStatus() {
+    void shouldAllowCancellationFromAnyStatusExceptCanceled() {
         assertThat(ProjectStatusTransitionPolicy.isAllowed(
                 ProjectStatus.ANALYSIS_COMPLETED,
                 ProjectStatus.CANCELED
@@ -37,14 +37,14 @@ class ProjectStatusTransitionPolicyTest {
                 ProjectStatus.IN_PROGRESS,
                 ProjectStatus.CANCELED
         )).isTrue();
-    }
-
-    @Test
-    void shouldRejectTransitionsFromTerminalStatuses() {
         assertThat(ProjectStatusTransitionPolicy.isAllowed(
                 ProjectStatus.CLOSED,
                 ProjectStatus.CANCELED
-        )).isFalse();
+        )).isTrue();
+    }
+
+    @Test
+    void shouldRejectTransitionsFromCanceledStatus() {
         assertThat(ProjectStatusTransitionPolicy.isAllowed(
                 ProjectStatus.CANCELED,
                 ProjectStatus.ANALYSIS

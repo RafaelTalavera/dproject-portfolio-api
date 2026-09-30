@@ -20,7 +20,7 @@ public final class ProjectStatusTransitionPolicy {
     }
 
     public static boolean isAllowed(ProjectStatus currentStatus, ProjectStatus targetStatus) {
-        if (isTerminal(currentStatus)) {
+        if (currentStatus == ProjectStatus.CANCELED) {
             return false;
         }
 
@@ -34,7 +34,4 @@ public final class ProjectStatusTransitionPolicy {
                 && NORMAL_SEQUENCE.get(currentPosition + 1) == targetStatus;
     }
 
-    private static boolean isTerminal(ProjectStatus status) {
-        return status == ProjectStatus.CLOSED || status == ProjectStatus.CANCELED;
-    }
 }
