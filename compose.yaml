@@ -16,5 +16,16 @@ services:
       retries: 10
       start_period: 5s
 
+  member-mock:
+    image: wiremock/wiremock:3.13.2-2
+    ports:
+      - "${PORTFOLIO_MEMBER_MOCK_PORT:-8083}:8080"
+    volumes:
+      - ./member-mock:/home/wiremock:ro
+    entrypoint:
+      - /docker-entrypoint.sh
+      - --global-response-templating
+      - --disable-gzip
+
 volumes:
   postgres_data:

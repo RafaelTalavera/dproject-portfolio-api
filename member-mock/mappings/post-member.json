@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/v1/members"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "jsonBody": {
+      "id": "{{randomValue type='UUID'}}",
+      "name": "{{jsonPath request.body '$.name'}}",
+      "assignment": "{{jsonPath request.body '$.assignment'}}"
+    }
+  }
+}
