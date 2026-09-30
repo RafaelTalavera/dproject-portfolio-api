@@ -12,6 +12,15 @@ import java.util.UUID;
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     @Query("""
+            SELECT DISTINCT project
+            FROM Project project
+            JOIN FETCH project.manager
+            LEFT JOIN FETCH project.members
+            WHERE project.id = :projectId
+            """)
+    java.util.Optional<Project> findDetailedById(@Param("projectId") UUID projectId);
+
+    @Query("""
             SELECT COUNT(project)
             FROM Project project
             JOIN project.members member

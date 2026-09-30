@@ -75,6 +75,12 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    public Project findDetailedById(UUID projectId) {
+        return projectRepository.findDetailedById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+    }
+
+    @Transactional(readOnly = true)
     public Page<Project> findAll(ProjectQueryFilter filter, Pageable pageable) {
         if (filter.startDateFrom() != null && filter.startDateTo() != null
                 && filter.startDateFrom().isAfter(filter.startDateTo())) {
