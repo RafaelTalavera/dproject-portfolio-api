@@ -30,6 +30,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -77,9 +78,10 @@ class ProjectControllerTest {
     @Test
     void shouldReturnPaginatedProjectSummaries() throws Exception {
         Project project = project();
-        when(projectService.findAll(any(ProjectQueryFilter.class), any())).thenReturn(new PageImpl<>(List.of(project), PageRequest.of(0, 20), 1));
+        when(projectService.findAll(any(ProjectQueryFilter.class), argThat(pageable -> pageable.getSort().isUnsorted())))
+                .thenReturn(new PageImpl<>(List.of(project), PageRequest.of(0, 20), 1));
 
-        mockMvc.perform(get("/api/v1/projects?name=teste&page=0&size=20")
+        mockMvc.perform(get("/api/v1/projects?name=teste&page=0&size=20&sort=string")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenService.generateToken("portfolio.admin")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(PROJECT_ID.toString()))

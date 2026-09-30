@@ -46,6 +46,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
                     (CAST(:risk AS text) = 'MEDIUM' AND p.total_budget <= 500000 AND p.expected_end_date <= p.start_date + INTERVAL '6 months'
                         AND (p.total_budget > 100000 OR p.expected_end_date > p.start_date + INTERVAL '3 months')) OR
                     (CAST(:risk AS text) = 'LOW' AND p.total_budget <= 100000 AND p.expected_end_date <= p.start_date + INTERVAL '3 months'))
+            ORDER BY p.start_date DESC
             """, countQuery = """
             SELECT COUNT(*) FROM portfolio.projects p
             WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', CAST(:name AS text), '%')))

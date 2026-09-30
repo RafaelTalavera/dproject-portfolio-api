@@ -18,8 +18,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,9 +73,10 @@ public class ProjectController {
             @RequestParam(required = false) LocalDate startDateFrom,
             @RequestParam(required = false) LocalDate startDateTo,
             @RequestParam(required = false) ProjectRisk risk,
-            @PageableDefault(size = 20, sort = "startDate", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 20) Pageable pageable
     ) {
-        return service.findAll(new ProjectQueryFilter(name, status, managerId, startDateFrom, startDateTo, risk), pageable)
+        Pageable safePageable = PageRequest.of(pageable.getPageNumber(), Math.min(pageable.getPageSize(), 100));
+        return service.findAll(new ProjectQueryFilter(name, status, managerId, startDateFrom, startDateTo, risk), safePageable)
                 .map(this::toSummaryResponse);
     }
 
