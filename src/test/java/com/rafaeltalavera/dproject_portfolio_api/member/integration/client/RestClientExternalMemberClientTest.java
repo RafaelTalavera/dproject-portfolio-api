@@ -5,14 +5,17 @@ import com.rafaeltalavera.dproject_portfolio_api.member.integration.dto.External
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -61,6 +64,19 @@ class RestClientExternalMemberClientTest {
 
         assertThat(response.id()).isEqualTo("employee-002");
         assertThat(response.assignment()).isEqualTo("funcionário");
+        server.verify();
+    }
+
+    @Test
+    void shouldReportExternalMemberNotFound() {
+        server.expect(requestTo("http://external-members.test/api/v1/members/unknown-member"))
+                .andExpect(method(GET))
+                .andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+        assertThatThrownBy(() -> client.findByExternalId("unknown-member"))
+                .isInstanceOf(com.rafaeltalavera.dproject_portfolio_api.member.integration.exception.ExternalMemberNotFoundException.class)
+                .hasMessageContaining("unknown-member");
+
         server.verify();
     }
 }

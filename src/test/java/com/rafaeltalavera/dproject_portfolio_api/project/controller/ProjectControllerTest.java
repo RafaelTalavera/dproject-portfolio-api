@@ -7,6 +7,8 @@ import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectStatus;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.ProjectQueryFilter;
 import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectBusinessRuleException;
 import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectNotFoundException;
+import com.rafaeltalavera.dproject_portfolio_api.member.integration.exception.ExternalMemberClientException;
+import com.rafaeltalavera.dproject_portfolio_api.member.integration.exception.ExternalMemberNotFoundException;
 import com.rafaeltalavera.dproject_portfolio_api.project.service.ProjectService;
 import com.rafaeltalavera.dproject_portfolio_api.security.config.SecurityConfig;
 import com.rafaeltalavera.dproject_portfolio_api.security.service.DatabaseUserDetailsService;
@@ -107,6 +109,28 @@ class ProjectControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenService.generateToken("portfolio.admin")))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.message").value("Regra de teste"));
+    }
+
+    @Test
+    void shouldReturnBadGatewayWhenExternalMemberApiIsUnavailable() throws Exception {
+        when(projectService.findDetailedById(PROJECT_ID))
+                .thenThrow(new ExternalMemberClientException("Falha de teste"));
+
+        mockMvc.perform(get("/api/v1/projects/{id}", PROJECT_ID)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenService.generateToken("portfolio.admin")))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.status").value(502));
+    }
+
+    @Test
+    void shouldReturnUnprocessableEntityForAnUnknownExternalMember() throws Exception {
+        when(projectService.findDetailedById(PROJECT_ID))
+                .thenThrow(new ExternalMemberNotFoundException("unknown-member", null));
+
+        mockMvc.perform(get("/api/v1/projects/{id}", PROJECT_ID)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenService.generateToken("portfolio.admin")))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value("O membro externo informado não foi encontrado: unknown-member."));
     }
 
     private Project project() {
