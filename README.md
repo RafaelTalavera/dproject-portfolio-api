@@ -73,6 +73,8 @@ curl -X POST http://localhost:8083/api/v1/members \
 
 ## Testes
 
+Na validaÃ§Ã£o de encerramento realizada em 2026-09-30, a suite passou e o relatÃ³rio JaCoCo registrou 73,63% de cobertura de instruÃ§Ãµes, acima da meta de 70% para as regras de negÃ³cio do desafio.
+
 ```bash
 ./mvnw clean test
 ```
