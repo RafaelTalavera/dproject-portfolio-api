@@ -4,6 +4,9 @@ import com.rafaeltalavera.dproject_portfolio_api.common.exception.GlobalExceptio
 import com.rafaeltalavera.dproject_portfolio_api.member.cache.domain.Member;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.Project;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectStatus;
+import com.rafaeltalavera.dproject_portfolio_api.project.dto.ProjectQueryFilter;
+import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectBusinessRuleException;
+import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectNotFoundException;
 import com.rafaeltalavera.dproject_portfolio_api.project.service.ProjectService;
 import com.rafaeltalavera.dproject_portfolio_api.security.config.SecurityConfig;
 import com.rafaeltalavera.dproject_portfolio_api.security.service.DatabaseUserDetailsService;
@@ -12,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,10 +24,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,6 +72,38 @@ class ProjectControllerTest {
                 .andExpect(jsonPath("$.manager.externalId").value("employee-001"))
                 .andExpect(jsonPath("$.members.length()").value(2))
                 .andExpect(jsonPath("$.members[0].externalId").value("employee-001"));
+    }
+
+    @Test
+    void shouldReturnPaginatedProjectSummaries() throws Exception {
+        when(projectService.findAll(any(ProjectQueryFilter.class), any())).thenReturn(new PageImpl<>(List.of(project()), PageRequest.of(0, 20), 1));
+
+        mockMvc.perform(get("/api/v1/projects?name=teste&page=0&size=20")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenService.generateToken("portfolio.admin")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(PROJECT_ID.toString()))
+                .andExpect(jsonPath("$.content[0].managerId").value(MANAGER_ID.toString()))
+                .andExpect(jsonPath("$.content[0].risk").value("MEDIUM"));
+    }
+
+    @Test
+    void shouldReturnNotFoundForUnknownProject() throws Exception {
+        when(projectService.findDetailedById(PROJECT_ID)).thenThrow(new ProjectNotFoundException(PROJECT_ID));
+
+        mockMvc.perform(get("/api/v1/projects/{id}", PROJECT_ID)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenService.generateToken("portfolio.admin")))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void shouldReturnUnprocessableEntityForBusinessRuleViolation() throws Exception {
+        when(projectService.findDetailedById(PROJECT_ID)).thenThrow(new ProjectBusinessRuleException("Regra de teste"));
+
+        mockMvc.perform(get("/api/v1/projects/{id}", PROJECT_ID)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenService.generateToken("portfolio.admin")))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value("Regra de teste"));
     }
 
     private Project project() {
