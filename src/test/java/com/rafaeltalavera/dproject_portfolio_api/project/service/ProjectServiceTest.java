@@ -189,7 +189,7 @@ class ProjectServiceTest {
     void shouldRequireActualEndDateWhenClosingProject() {
         Project project = project(ProjectStatus.IN_PROGRESS);
         UUID projectId = UUID.randomUUID();
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.findByIdForUpdate(projectId)).thenReturn(Optional.of(project));
 
         assertThatThrownBy(() -> projectService.changeStatus(
                 projectId, new ChangeProjectStatusRequest(ProjectStatus.CLOSED, null)
@@ -201,7 +201,7 @@ class ProjectServiceTest {
     void shouldChangeToNextStatus() {
         Project project = project(ProjectStatus.ANALYSIS);
         UUID projectId = UUID.randomUUID();
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.findByIdForUpdate(projectId)).thenReturn(Optional.of(project));
 
         Project changed = projectService.changeStatus(
                 projectId, new ChangeProjectStatusRequest(ProjectStatus.ANALYSIS_COMPLETED, null)
@@ -217,7 +217,7 @@ class ProjectServiceTest {
                 new BigDecimal("250000.00"), "Descrição", manager, ProjectStatus.CLOSED, java.util.Set.of(manager)
         );
         UUID projectId = UUID.randomUUID();
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.findByIdForUpdate(projectId)).thenReturn(Optional.of(project));
 
         Project updated = projectService.update(projectId, new UpdateProjectRequest(
                 "Projeto encerrado atualizado", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 15), null,
@@ -231,7 +231,7 @@ class ProjectServiceTest {
     void shouldRejectDeletionForBlockedStatus() {
         Project project = project(ProjectStatus.STARTED);
         UUID projectId = UUID.randomUUID();
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.findByIdForUpdate(projectId)).thenReturn(Optional.of(project));
 
         assertThatThrownBy(() -> projectService.delete(projectId))
                 .isInstanceOf(ProjectBusinessRuleException.class)
@@ -255,7 +255,7 @@ class ProjectServiceTest {
     void shouldRejectClosingBeforeProjectStartDate() {
         Project project = project(ProjectStatus.IN_PROGRESS);
         UUID projectId = UUID.randomUUID();
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        when(projectRepository.findByIdForUpdate(projectId)).thenReturn(Optional.of(project));
 
         assertThatThrownBy(() -> projectService.changeStatus(
                 projectId, new ChangeProjectStatusRequest(ProjectStatus.CLOSED, LocalDate.of(2026, 9, 30))
@@ -266,7 +266,7 @@ class ProjectServiceTest {
     @Test
     void shouldReportProjectNotFoundWhenChangingStatus() {
         UUID projectId = UUID.randomUUID();
-        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+        when(projectRepository.findByIdForUpdate(projectId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> projectService.changeStatus(
                 projectId, new ChangeProjectStatusRequest(ProjectStatus.ANALYSIS_COMPLETED, null)

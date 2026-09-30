@@ -5,13 +5,19 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
 
 import java.util.UUID;
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT project FROM Project project WHERE project.id = :projectId")
+    java.util.Optional<Project> findByIdForUpdate(@Param("projectId") UUID projectId);
 
     @Query("""
             SELECT DISTINCT project

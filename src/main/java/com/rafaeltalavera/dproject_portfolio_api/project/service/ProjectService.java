@@ -102,7 +102,7 @@ public class ProjectService {
 
     @Transactional
     public Project update(UUID projectId, UpdateProjectRequest request) {
-        Project project = findProject(projectId);
+        Project project = findProjectForUpdate(projectId);
         LocalDate actualEndDate = project.getStatus() == ProjectStatus.CLOSED && request.actualEndDate() == null
                 ? project.getActualEndDate()
                 : request.actualEndDate();
@@ -128,7 +128,7 @@ public class ProjectService {
 
     @Transactional
     public Project changeStatus(UUID projectId, ChangeProjectStatusRequest request) {
-        Project project = findProject(projectId);
+        Project project = findProjectForUpdate(projectId);
         if (!ProjectStatusTransitionPolicy.isAllowed(project.getStatus(), request.status())) {
             throw new ProjectBusinessRuleException("A transição de status informada não é permitida.");
         }
@@ -148,7 +148,7 @@ public class ProjectService {
 
     @Transactional
     public void delete(UUID projectId) {
-        Project project = findProject(projectId);
+        Project project = findProjectForUpdate(projectId);
         if (!ProjectDeletionPolicy.canDelete(project.getStatus())) {
             throw new ProjectBusinessRuleException("Não é permitido excluir um projeto neste status.");
         }
@@ -263,5 +263,9 @@ public class ProjectService {
 
     private Project findProject(UUID projectId) {
         return projectRepository.findById(projectId).orElseThrow(() -> new ProjectNotFoundException(projectId));
+    }
+
+    private Project findProjectForUpdate(UUID projectId) {
+        return projectRepository.findByIdForUpdate(projectId).orElseThrow(() -> new ProjectNotFoundException(projectId));
     }
 }
