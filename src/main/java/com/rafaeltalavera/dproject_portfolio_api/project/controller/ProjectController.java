@@ -13,6 +13,9 @@ import com.rafaeltalavera.dproject_portfolio_api.project.dto.ProjectQueryFilter;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.ProjectSummaryResponse;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.UpdateProjectRequest;
 import com.rafaeltalavera.dproject_portfolio_api.project.service.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +42,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/projects")
+@Tag(name = "Projetos", description = "CRUD e ciclo de vida dos projetos do portfÃ³lio.")
+@SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
     private final ProjectService service;
@@ -48,16 +53,19 @@ public class ProjectController {
     }
 
     @PostMapping
+    @Operation(summary = "Cria um projeto")
     public ResponseEntity<ProjectDetailsResponse> create(@Valid @RequestBody CreateProjectRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(toDetailsResponse(service.create(request)));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Consulta o detalhe de um projeto")
     public ProjectDetailsResponse find(@PathVariable UUID id) {
         return toDetailsResponse(service.findDetailedById(id));
     }
 
     @GetMapping
+    @Operation(summary = "Lista projetos com filtros e paginaÃ§Ã£o")
     public Page<ProjectSummaryResponse> list(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) ProjectStatus status,
@@ -72,11 +80,13 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualiza os dados e membros de um projeto")
     public ProjectDetailsResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateProjectRequest request) {
         return toDetailsResponse(service.update(id, request));
     }
 
     @PatchMapping("/{id}/status")
+    @Operation(summary = "Altera explicitamente o status de um projeto")
     public ProjectSummaryResponse changeStatus(
             @PathVariable UUID id,
             @Valid @RequestBody ChangeProjectStatusRequest request
@@ -85,6 +95,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Exclui um projeto quando o status permite")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         service.delete(id);
