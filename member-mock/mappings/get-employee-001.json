@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/v1/members/employee-001"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "jsonBody": {
+      "id": "employee-001",
+      "name": "Ana Silva",
+      "assignment": "funcionário"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/v1/members/consultant-001"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "jsonBody": {
+      "id": "consultant-001",
+      "name": "Bruno Costa",
+      "assignment": "consultor"
+    }
+  }
+}

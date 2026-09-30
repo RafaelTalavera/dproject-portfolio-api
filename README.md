@@ -44,6 +44,25 @@ endpoints de negócio. A variável `PORTFOLIO_JWT_SECRET` do `.env` assina os
 tokens. O valor de exemplo serve apenas para desenvolvimento local e deve ser
 substituído em ambientes compartilhados ou de produção.
 
+## API externa mockada de membros
+
+O Docker Compose também inicia uma API externa mockada de membros na porta
+`8083` por padrão. Ela representa o sistema que é a fonte de verdade para o
+cadastro de membros; a aplicação não disponibilizará CRUD local de membros.
+
+- `GET /api/v1/members/employee-001` retorna um funcionário de demonstração.
+- `GET /api/v1/members/consultant-001` retorna um consultor de demonstração.
+- `POST /api/v1/members` recebe `name` e `assignment` e retorna um membro
+  externo criado.
+
+Exemplo de criação direta no mock:
+
+```bash
+curl -X POST http://localhost:8083/api/v1/members \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Ana Silva","assignment":"funcionário"}'
+```
+
 ## Testes
 
 ```bash
