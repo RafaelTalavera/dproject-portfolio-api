@@ -6,7 +6,12 @@ import com.rafaeltalavera.dproject_portfolio_api.member.integration.service.Memb
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.Project;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectStatus;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.CreateProjectRequest;
+import com.rafaeltalavera.dproject_portfolio_api.project.dto.UpdateProjectRequest;
+import com.rafaeltalavera.dproject_portfolio_api.project.dto.ChangeProjectStatusRequest;
+import com.rafaeltalavera.dproject_portfolio_api.project.domain.policy.ProjectDeletionPolicy;
+import com.rafaeltalavera.dproject_portfolio_api.project.domain.policy.ProjectStatusTransitionPolicy;
 import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectBusinessRuleException;
+import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectNotFoundException;
 import com.rafaeltalavera.dproject_portfolio_api.project.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +20,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.time.LocalDate;
 
 @Service
 public class ProjectService {
@@ -64,13 +71,59 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
+    @Transactional
+    public Project update(UUID projectId, UpdateProjectRequest request) {
+        Project project = findProject(projectId);
+        validateDates(request.startDate(), request.expectedEndDate(), request.actualEndDate());
+        validateMemberCount(request.memberExternalIds());
+        validateNoDuplicateMembers(request.memberExternalIds());
+        Set<Member> members = resolveEmployees(request.memberExternalIds());
+        Member manager = findManager(request.managerExternalId(), members);
+        validateManagerIsAllocated(manager, members);
+        validateActiveProjectLimit(project, members);
+        project.updateDetails(request.name(), request.startDate(), request.expectedEndDate(), request.actualEndDate(),
+                request.totalBudget(), request.description(), manager, members);
+        return project;
+    }
+
+    @Transactional
+    public Project changeStatus(UUID projectId, ChangeProjectStatusRequest request) {
+        Project project = findProject(projectId);
+        if (!ProjectStatusTransitionPolicy.isAllowed(project.getStatus(), request.status())) {
+            throw new ProjectBusinessRuleException("A transição de status informada não é permitida.");
+        }
+        if (request.status() == ProjectStatus.CLOSED) {
+            if (request.actualEndDate() == null) {
+                throw new ProjectBusinessRuleException("A data real de término é obrigatória para encerrar o projeto.");
+            }
+            if (request.actualEndDate().isBefore(project.getStartDate())) {
+                throw new ProjectBusinessRuleException("A data real de término deve ser igual ou posterior à data de início.");
+            }
+        }
+        project.changeStatus(request.status(), request.actualEndDate());
+        return project;
+    }
+
+    @Transactional
+    public void delete(UUID projectId) {
+        Project project = findProject(projectId);
+        if (!ProjectDeletionPolicy.canDelete(project.getStatus())) {
+            throw new ProjectBusinessRuleException("Não é permitido excluir um projeto neste status.");
+        }
+        projectRepository.delete(project);
+    }
+
     private void validateDates(CreateProjectRequest request) {
-        if (request.expectedEndDate().isBefore(request.startDate())) {
+        validateDates(request.startDate(), request.expectedEndDate(), request.actualEndDate());
+    }
+
+    private void validateDates(LocalDate startDate, LocalDate expectedEndDate, LocalDate actualEndDate) {
+        if (expectedEndDate.isBefore(startDate)) {
             throw new ProjectBusinessRuleException(
                     "A previsão de término deve ser igual ou posterior à data de início."
             );
         }
-        if (request.actualEndDate() != null && request.actualEndDate().isBefore(request.startDate())) {
+        if (actualEndDate != null && actualEndDate.isBefore(startDate)) {
             throw new ProjectBusinessRuleException(
                     "A data real de término deve ser igual ou posterior à data de início."
             );
@@ -151,5 +204,21 @@ public class ProjectService {
                 );
             }
         }
+    }
+
+    private void validateActiveProjectLimit(Project project, Set<Member> members) {
+        if (project.getStatus() == ProjectStatus.CLOSED || project.getStatus() == ProjectStatus.CANCELED) {
+            return;
+        }
+        for (Member member : members) {
+            if (!project.getMembers().contains(member)
+                    && projectRepository.countActiveProjectsByMemberId(member.getId()) >= MAXIMUM_ACTIVE_PROJECTS_PER_MEMBER) {
+                throw new ProjectBusinessRuleException("Um membro não pode estar alocado em mais de três projetos ativos.");
+            }
+        }
+    }
+
+    private Project findProject(UUID projectId) {
+        return projectRepository.findById(projectId).orElseThrow(() -> new ProjectNotFoundException(projectId));
     }
 }

@@ -6,6 +6,7 @@ import com.rafaeltalavera.dproject_portfolio_api.member.integration.service.Memb
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.Project;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectStatus;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.CreateProjectRequest;
+import com.rafaeltalavera.dproject_portfolio_api.project.dto.ChangeProjectStatusRequest;
 import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectBusinessRuleException;
 import com.rafaeltalavera.dproject_portfolio_api.project.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -177,6 +178,44 @@ class ProjectServiceTest {
                 .hasMessage("Um membro não pode estar alocado em mais de três projetos ativos.");
     }
 
+    @Test
+    void shouldRequireActualEndDateWhenClosingProject() {
+        Project project = project(ProjectStatus.IN_PROGRESS);
+        UUID projectId = UUID.randomUUID();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        assertThatThrownBy(() -> projectService.changeStatus(
+                projectId, new ChangeProjectStatusRequest(ProjectStatus.CLOSED, null)
+        )).isInstanceOf(ProjectBusinessRuleException.class)
+                .hasMessage("A data real de término é obrigatória para encerrar o projeto.");
+    }
+
+    @Test
+    void shouldChangeToNextStatus() {
+        Project project = project(ProjectStatus.ANALYSIS);
+        UUID projectId = UUID.randomUUID();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        Project changed = projectService.changeStatus(
+                projectId, new ChangeProjectStatusRequest(ProjectStatus.ANALYSIS_COMPLETED, null)
+        );
+
+        assertThat(changed.getStatus()).isEqualTo(ProjectStatus.ANALYSIS_COMPLETED);
+    }
+
+    @Test
+    void shouldRejectDeletionForBlockedStatus() {
+        Project project = project(ProjectStatus.STARTED);
+        UUID projectId = UUID.randomUUID();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        assertThatThrownBy(() -> projectService.delete(projectId))
+                .isInstanceOf(ProjectBusinessRuleException.class)
+                .hasMessage("Não é permitido excluir um projeto neste status.");
+
+        verify(projectRepository, never()).delete(any(Project.class));
+    }
+
     private CreateProjectRequest validRequest() {
         return request(
                 LocalDate.of(2026, 10, 1),
@@ -215,5 +254,12 @@ class ProjectServiceTest {
         when(member.getExternalId()).thenReturn(externalId);
         when(member.getAssignment()).thenReturn(assignment);
         return member;
+    }
+
+    private Project project(ProjectStatus status) {
+        return Project.create(
+                "Projeto de teste", LocalDate.of(2026, 10, 1), LocalDate.of(2027, 1, 1), null,
+                new BigDecimal("250000.00"), "Descrição de teste", manager, status, java.util.Set.of(manager)
+        );
     }
 }

@@ -117,6 +117,31 @@ public class Project {
         return id;
     }
 
+    public void updateDetails(
+            String name, LocalDate startDate, LocalDate expectedEndDate, LocalDate actualEndDate,
+            BigDecimal totalBudget, String description, Member manager, Set<Member> members
+    ) {
+        this.name = name;
+        this.startDate = startDate;
+        this.expectedEndDate = expectedEndDate;
+        this.actualEndDate = actualEndDate;
+        this.totalBudget = totalBudget;
+        this.description = description;
+        this.manager = manager;
+        this.members = new LinkedHashSet<>(members);
+    }
+
+    public void changeStatus(ProjectStatus status, LocalDate actualEndDate) {
+        this.status = status;
+        if (status == ProjectStatus.CLOSED) {
+            this.actualEndDate = actualEndDate;
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public LocalDate getStartDate() {
         return startDate;
     }
@@ -131,6 +156,10 @@ public class Project {
 
     public BigDecimal getTotalBudget() {
         return totalBudget;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public ProjectStatus getStatus() {
