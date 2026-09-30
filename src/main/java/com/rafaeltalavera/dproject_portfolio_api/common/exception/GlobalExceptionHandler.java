@@ -1,29 +1,30 @@
 package com.rafaeltalavera.dproject_portfolio_api.common.exception;
 
+import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectBusinessRuleException;
+import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectNotFoundException;
 import com.rafaeltalavera.dproject_portfolio_api.security.exception.InvalidCredentialsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-
 import java.time.Instant;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<ApiError> notFound(ProjectNotFoundException exception, WebRequest request) { return error(HttpStatus.NOT_FOUND, "NÃ£o encontrado", exception.getMessage(), request); }
+    @ExceptionHandler(ProjectBusinessRuleException.class)
+    public ResponseEntity<ApiError> business(ProjectBusinessRuleException exception, WebRequest request) { return error(HttpStatus.UNPROCESSABLE_ENTITY, "Regra de negÃ³cio", exception.getMessage(), request); }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> validation(MethodArgumentNotValidException exception, WebRequest request) {
+        String message = exception.getBindingResult().getFieldErrors().stream().findFirst().map(error -> error.getDefaultMessage()).orElse("A requisiÃ§Ã£o possui dados invÃ¡lidos.");
+        return error(HttpStatus.BAD_REQUEST, "RequisiÃ§Ã£o invÃ¡lida", message, request);
+    }
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ApiError> handleInvalidCredentials(
-            InvalidCredentialsException exception,
-            WebRequest request
-    ) {
-        ApiError error = new ApiError(
-                Instant.now(),
-                HttpStatus.UNAUTHORIZED.value(),
-                "Não autorizado",
-                exception.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    public ResponseEntity<ApiError> credentials(InvalidCredentialsException exception, WebRequest request) { return error(HttpStatus.UNAUTHORIZED, "NÃ£o autorizado", exception.getMessage(), request); }
+    private ResponseEntity<ApiError> error(HttpStatus status, String error, String message, WebRequest request) {
+        return ResponseEntity.status(status).body(new ApiError(Instant.now(), status.value(), error, message, request.getDescription(false).replace("uri=", "")));
     }
 }
