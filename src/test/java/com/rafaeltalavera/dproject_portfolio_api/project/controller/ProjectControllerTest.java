@@ -76,7 +76,8 @@ class ProjectControllerTest {
 
     @Test
     void shouldReturnPaginatedProjectSummaries() throws Exception {
-        when(projectService.findAll(any(ProjectQueryFilter.class), any())).thenReturn(new PageImpl<>(List.of(project()), PageRequest.of(0, 20), 1));
+        Project project = project();
+        when(projectService.findAll(any(ProjectQueryFilter.class), any())).thenReturn(new PageImpl<>(List.of(project), PageRequest.of(0, 20), 1));
 
         mockMvc.perform(get("/api/v1/projects?name=teste&page=0&size=20")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtTokenService.generateToken("portfolio.admin")))
