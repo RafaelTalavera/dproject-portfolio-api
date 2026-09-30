@@ -6,7 +6,7 @@
       {
         "matchesJsonPath": {
           "expression": "$.assignment",
-          "equalTo": "funcionário"
+          "equalTo": "consultor"
         }
       }
     ]
@@ -17,7 +17,7 @@
       "Content-Type": "application/json; charset=UTF-8"
     },
     "jsonBody": {
-      "id": "employee-{{randomValue type='UUID'}}",
+      "id": "consultant-{{randomValue type='UUID'}}",
       "name": "{{jsonPath request.body '$.name'}}",
       "assignment": "{{jsonPath request.body '$.assignment'}}"
     }

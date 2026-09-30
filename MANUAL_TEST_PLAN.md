@@ -16,6 +16,8 @@ Esperado: login `200`; rota de neg&oacute;cio sem token retorna `401` e com toke
 
 O mock fornece `employee-001` (funcion&aacute;rio) e `consultant-001` (consultor).
 
+Para validar um membro novo, crie-o diretamente em `POST http://localhost:8083/api/v1/members`, consulte o `id` retornado em `GET http://localhost:8083/api/v1/members/{id}` e use esse mesmo identificador na criação de um projeto. Um membro com atribuição `funcionário` deve ser aceito; `consultor` deve retornar `422`.
+
 | Caso | A&ccedil;&atilde;o | Esperado |
 |---|---|---|
 | Funcion&aacute;rio | Usar `employee-001` como gerente e membro | `201` |

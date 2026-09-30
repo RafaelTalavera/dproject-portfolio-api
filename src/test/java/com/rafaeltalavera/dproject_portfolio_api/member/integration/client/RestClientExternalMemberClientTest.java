@@ -68,6 +68,25 @@ class RestClientExternalMemberClientTest {
     }
 
     @Test
+    void shouldRetrieveAMemberAfterCreatingIt() {
+        String externalId = "employee-created-001";
+        String responseBody = "{\"id\":\"employee-created-001\",\"name\":\"Marina Souza\",\"assignment\":\"funcionário\"}";
+        server.expect(requestTo("http://external-members.test/api/v1/members"))
+                .andExpect(method(POST))
+                .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+        server.expect(requestTo("http://external-members.test/api/v1/members/" + externalId))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+
+        ExternalMemberResponse created = client.create(new CreateExternalMemberRequest("Marina Souza", "funcionário"));
+        ExternalMemberResponse retrieved = client.findByExternalId(created.id());
+
+        assertThat(retrieved.id()).isEqualTo(created.id());
+        assertThat(retrieved.assignment()).isEqualTo("funcionário");
+        server.verify();
+    }
+
+    @Test
     void shouldReportExternalMemberNotFound() {
         server.expect(requestTo("http://external-members.test/api/v1/members/unknown-member"))
                 .andExpect(method(GET))
