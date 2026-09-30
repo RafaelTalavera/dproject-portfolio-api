@@ -9,6 +9,7 @@ import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectStatus;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.CreateProjectRequest;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.ChangeProjectStatusRequest;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.ProjectQueryFilter;
+import com.rafaeltalavera.dproject_portfolio_api.project.dto.UpdateProjectRequest;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectRisk;
 import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectNotFoundException;
 import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectBusinessRuleException;
@@ -207,6 +208,23 @@ class ProjectServiceTest {
         );
 
         assertThat(changed.getStatus()).isEqualTo(ProjectStatus.ANALYSIS_COMPLETED);
+    }
+
+    @Test
+    void shouldPreserveActualEndDateWhenUpdatingClosedProjectWithoutANewDate() {
+        Project project = Project.create(
+                "Projeto encerrado", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 1), LocalDate.of(2026, 2, 15),
+                new BigDecimal("250000.00"), "Descrição", manager, ProjectStatus.CLOSED, java.util.Set.of(manager)
+        );
+        UUID projectId = UUID.randomUUID();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        Project updated = projectService.update(projectId, new UpdateProjectRequest(
+                "Projeto encerrado atualizado", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 15), null,
+                new BigDecimal("260000.00"), "Descrição atualizada", "employee-001", List.of("employee-001")
+        ));
+
+        assertThat(updated.getActualEndDate()).isEqualTo(LocalDate.of(2026, 2, 15));
     }
 
     @Test

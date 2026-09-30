@@ -103,14 +103,22 @@ public class ProjectService {
     @Transactional
     public Project update(UUID projectId, UpdateProjectRequest request) {
         Project project = findProject(projectId);
-        validateDates(request.startDate(), request.expectedEndDate(), request.actualEndDate());
+        LocalDate actualEndDate = project.getStatus() == ProjectStatus.CLOSED && request.actualEndDate() == null
+                ? project.getActualEndDate()
+                : request.actualEndDate();
+        validateDates(request.startDate(), request.expectedEndDate(), actualEndDate);
+        if (project.getStatus() == ProjectStatus.CLOSED && actualEndDate == null) {
+            throw new ProjectBusinessRuleException(
+                    "Um projeto encerrado deve possuir uma data real de término."
+            );
+        }
         validateMemberCount(request.memberExternalIds());
         validateNoDuplicateMembers(request.memberExternalIds());
         Set<Member> members = resolveEmployees(request.memberExternalIds());
         Member manager = findManager(request.managerExternalId(), members);
         validateManagerIsAllocated(manager, members);
         validateActiveProjectLimit(project, members);
-        project.updateDetails(request.name(), request.startDate(), request.expectedEndDate(), request.actualEndDate(),
+        project.updateDetails(request.name(), request.startDate(), request.expectedEndDate(), actualEndDate,
                 request.totalBudget(), request.description(), manager, members);
         project.touchAudit(projectAuditService.currentActor());
         projectAuditService.record(projectId, ProjectAuditEventType.UPDATED, "Dados do projeto atualizados.");
