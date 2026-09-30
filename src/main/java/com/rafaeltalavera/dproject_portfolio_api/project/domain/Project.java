@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.Collections;
 import java.util.Set;
@@ -63,6 +64,11 @@ public class Project {
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
     private Set<Member> members = new LinkedHashSet<>();
+
+    @Column(name = "created_at", nullable = false) private OffsetDateTime createdAt;
+    @Column(name = "updated_at", nullable = false) private OffsetDateTime updatedAt;
+    @Column(name = "created_by", nullable = false) private String createdBy;
+    @Column(name = "updated_by", nullable = false) private String updatedBy;
 
     protected Project() {
     }
@@ -137,6 +143,9 @@ public class Project {
             this.actualEndDate = actualEndDate;
         }
     }
+
+    public void initializeAudit(String actor) { OffsetDateTime now = OffsetDateTime.now(); this.createdAt = now; this.updatedAt = now; this.createdBy = actor; this.updatedBy = actor; }
+    public void touchAudit(String actor) { this.updatedAt = OffsetDateTime.now(); this.updatedBy = actor; }
 
     public String getName() {
         return name;

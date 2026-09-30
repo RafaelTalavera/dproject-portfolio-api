@@ -1,6 +1,8 @@
 package com.rafaeltalavera.dproject_portfolio_api.project.service;
 
 import com.rafaeltalavera.dproject_portfolio_api.member.cache.domain.Member;
+import com.rafaeltalavera.dproject_portfolio_api.audit.domain.ProjectAuditEventType;
+import com.rafaeltalavera.dproject_portfolio_api.audit.service.ProjectAuditService;
 import com.rafaeltalavera.dproject_portfolio_api.member.cache.repository.MemberRepository;
 import com.rafaeltalavera.dproject_portfolio_api.member.integration.service.MemberIntegrationService;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.Project;
@@ -37,15 +39,18 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final MemberRepository memberRepository;
     private final MemberIntegrationService memberIntegrationService;
+    private final ProjectAuditService projectAuditService;
 
     public ProjectService(
             ProjectRepository projectRepository,
             MemberRepository memberRepository,
-            MemberIntegrationService memberIntegrationService
+            MemberIntegrationService memberIntegrationService,
+            ProjectAuditService projectAuditService
     ) {
         this.projectRepository = projectRepository;
         this.memberRepository = memberRepository;
         this.memberIntegrationService = memberIntegrationService;
+        this.projectAuditService = projectAuditService;
     }
 
     @Transactional
@@ -71,7 +76,10 @@ public class ProjectService {
                 request.status(),
                 members
         );
-        return projectRepository.save(project);
+        project.initializeAudit(projectAuditService.currentActor());
+        Project savedProject = projectRepository.save(project);
+        projectAuditService.record(savedProject.getId(), ProjectAuditEventType.CREATED, "Projeto criado.");
+        return savedProject;
     }
 
     @Transactional(readOnly = true)
@@ -104,6 +112,9 @@ public class ProjectService {
         validateActiveProjectLimit(project, members);
         project.updateDetails(request.name(), request.startDate(), request.expectedEndDate(), request.actualEndDate(),
                 request.totalBudget(), request.description(), manager, members);
+        project.touchAudit(projectAuditService.currentActor());
+        projectAuditService.record(projectId, ProjectAuditEventType.UPDATED, "Dados do projeto atualizados.");
+        projectAuditService.record(projectId, ProjectAuditEventType.MEMBERS_CHANGED, "Membros alocados atualizados.");
         return project;
     }
 
@@ -122,6 +133,8 @@ public class ProjectService {
             }
         }
         project.changeStatus(request.status(), request.actualEndDate());
+        project.touchAudit(projectAuditService.currentActor());
+        projectAuditService.record(projectId, ProjectAuditEventType.STATUS_CHANGED, "Status alterado para " + request.status() + ".");
         return project;
     }
 
@@ -131,6 +144,7 @@ public class ProjectService {
         if (!ProjectDeletionPolicy.canDelete(project.getStatus())) {
             throw new ProjectBusinessRuleException("Não é permitido excluir um projeto neste status.");
         }
+        projectAuditService.record(projectId, ProjectAuditEventType.DELETED, "Projeto excluÃ­do.");
         projectRepository.delete(project);
     }
 

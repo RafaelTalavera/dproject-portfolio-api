@@ -3,6 +3,7 @@ package com.rafaeltalavera.dproject_portfolio_api.project.service;
 import com.rafaeltalavera.dproject_portfolio_api.member.cache.domain.Member;
 import com.rafaeltalavera.dproject_portfolio_api.member.cache.repository.MemberRepository;
 import com.rafaeltalavera.dproject_portfolio_api.member.integration.service.MemberIntegrationService;
+import com.rafaeltalavera.dproject_portfolio_api.audit.service.ProjectAuditService;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.Project;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectStatus;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.CreateProjectRequest;
@@ -38,6 +39,7 @@ class ProjectServiceTest {
     private final ProjectRepository projectRepository = mock(ProjectRepository.class);
     private final MemberRepository memberRepository = mock(MemberRepository.class);
     private final MemberIntegrationService memberIntegrationService = mock(MemberIntegrationService.class);
+    private final ProjectAuditService projectAuditService = mock(ProjectAuditService.class);
     private final Member manager = member("employee-001", "funcionário");
     private final Member developer = member("employee-002", "funcionário");
 
@@ -45,7 +47,7 @@ class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        projectService = new ProjectService(projectRepository, memberRepository, memberIntegrationService);
+        projectService = new ProjectService(projectRepository, memberRepository, memberIntegrationService, projectAuditService);
         when(memberRepository.findByExternalId(anyString())).thenAnswer(invocation -> Optional.ofNullable(
                 Map.of(
                         manager.getExternalId(), manager,
