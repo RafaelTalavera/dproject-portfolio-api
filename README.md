@@ -44,6 +44,14 @@ endpoints de negócio. A variável `PORTFOLIO_JWT_SECRET` do `.env` assina os
 tokens. O valor de exemplo serve apenas para desenvolvimento local e deve ser
 substituído em ambientes compartilhados ou de produção.
 
+## Teste manual pelo Swagger
+
+1. Acesse `http://localhost:8081/swagger-ui/index.html` e execute `POST /api/v1/auth/login` com `portfolio.admin` e `password`.
+2. Copie o campo `accessToken`. Em **Authorize**, informe `Bearer <accessToken>` para autenticar os endpoints de negÃ³cio.
+3. Crie um projeto em `POST /api/v1/projects` usando `employee-001` como `managerExternalId` e como Ãºnico item de `memberExternalIds`.
+4. Copie o `id` retornado pelo `201 Created` e informe esse valor em `GET /api/v1/projects/{id}`. O UUID exibido inicialmente no Swagger Ã© apenas um exemplo e deve ser substituÃ­do pelo identificador real retornado pela criaÃ§Ã£o.
+5. Valide a alteraÃ§Ã£o via `PUT /api/v1/projects/{id}`, as transiÃ§Ãµes via `PATCH /api/v1/projects/{id}/status`, a exclusÃ£o via `DELETE /api/v1/projects/{id}` e o resumo em `GET /api/v1/reports/portfolio-summary`.
+
 ## API externa mockada de membros
 
 O Docker Compose também inicia uma API externa mockada de membros na porta
