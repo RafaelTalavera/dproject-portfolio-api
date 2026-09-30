@@ -14,16 +14,16 @@ import java.time.Instant;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(ProjectNotFoundException.class)
-    public ResponseEntity<ApiError> notFound(ProjectNotFoundException exception, WebRequest request) { return error(HttpStatus.NOT_FOUND, "NÃ£o encontrado", exception.getMessage(), request); }
+    public ResponseEntity<ApiError> notFound(ProjectNotFoundException exception, WebRequest request) { return error(HttpStatus.NOT_FOUND, "N\u00e3o encontrado", exception.getMessage(), request); }
     @ExceptionHandler(ProjectBusinessRuleException.class)
-    public ResponseEntity<ApiError> business(ProjectBusinessRuleException exception, WebRequest request) { return error(HttpStatus.UNPROCESSABLE_ENTITY, "Regra de negÃ³cio", exception.getMessage(), request); }
+    public ResponseEntity<ApiError> business(ProjectBusinessRuleException exception, WebRequest request) { return error(HttpStatus.UNPROCESSABLE_ENTITY, "Regra de neg\u00f3cio", exception.getMessage(), request); }
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> validation(MethodArgumentNotValidException exception, WebRequest request) {
-        String message = exception.getBindingResult().getFieldErrors().stream().findFirst().map(error -> error.getDefaultMessage()).orElse("A requisiÃ§Ã£o possui dados invÃ¡lidos.");
-        return error(HttpStatus.BAD_REQUEST, "RequisiÃ§Ã£o invÃ¡lida", message, request);
+        String message = exception.getBindingResult().getFieldErrors().stream().findFirst().map(error -> error.getDefaultMessage()).orElse("A requisi\u00e7\u00e3o possui dados inv\u00e1lidos.");
+        return error(HttpStatus.BAD_REQUEST, "Requisi\u00e7\u00e3o inv\u00e1lida", message, request);
     }
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ApiError> credentials(InvalidCredentialsException exception, WebRequest request) { return error(HttpStatus.UNAUTHORIZED, "NÃ£o autorizado", exception.getMessage(), request); }
+    public ResponseEntity<ApiError> credentials(InvalidCredentialsException exception, WebRequest request) { return error(HttpStatus.UNAUTHORIZED, "N\u00e3o autorizado", exception.getMessage(), request); }
     private ResponseEntity<ApiError> error(HttpStatus status, String error, String message, WebRequest request) {
         return ResponseEntity.status(status).body(new ApiError(Instant.now(), status.value(), error, message, request.getDescription(false).replace("uri=", "")));
     }

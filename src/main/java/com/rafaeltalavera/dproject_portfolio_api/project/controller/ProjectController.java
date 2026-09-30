@@ -42,7 +42,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/projects")
-@Tag(name = "Projetos", description = "CRUD e ciclo de vida dos projetos do portfÃ³lio.")
+@Tag(name = "Projetos", description = "CRUD e ciclo de vida dos projetos do portf\u00f3lio.")
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
@@ -65,7 +65,7 @@ public class ProjectController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista projetos com filtros e paginaÃ§Ã£o")
+    @Operation(summary = "Lista projetos com filtros e pagina\u00e7\u00e3o")
     public Page<ProjectSummaryResponse> list(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) ProjectStatus status,

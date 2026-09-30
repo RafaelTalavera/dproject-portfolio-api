@@ -144,7 +144,7 @@ public class ProjectService {
         if (!ProjectDeletionPolicy.canDelete(project.getStatus())) {
             throw new ProjectBusinessRuleException("Não é permitido excluir um projeto neste status.");
         }
-        projectAuditService.record(projectId, ProjectAuditEventType.DELETED, "Projeto excluÃ­do.");
+        projectAuditService.record(projectId, ProjectAuditEventType.DELETED, "Projeto exclu\u00eddo.");
         projectRepository.delete(project);
     }
 

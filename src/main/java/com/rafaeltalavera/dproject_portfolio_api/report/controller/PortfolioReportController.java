@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/reports")
-@Tag(name = "RelatÃ³rios", description = "Indicadores agregados do portfÃ³lio.")
+@Tag(name = "Relat\u00f3rios", description = "Indicadores agregados do portf\u00f3lio.")
 @SecurityRequirement(name = "bearerAuth")
 public class PortfolioReportController {
 
@@ -22,7 +22,7 @@ public class PortfolioReportController {
     }
 
     @GetMapping("/portfolio-summary")
-    @Operation(summary = "Consulta o resumo do portfÃ³lio")
+    @Operation(summary = "Consulta o resumo do portf\u00f3lio")
     public PortfolioSummaryResponse summarizePortfolio() {
         return portfolioReportService.summarize();
     }
