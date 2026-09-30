@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -64,5 +65,83 @@ public class Project {
     private Set<Member> members = new LinkedHashSet<>();
 
     protected Project() {
+    }
+
+    private Project(
+            String name,
+            LocalDate startDate,
+            LocalDate expectedEndDate,
+            LocalDate actualEndDate,
+            BigDecimal totalBudget,
+            String description,
+            Member manager,
+            ProjectStatus status,
+            Set<Member> members
+    ) {
+        this.name = name;
+        this.startDate = startDate;
+        this.expectedEndDate = expectedEndDate;
+        this.actualEndDate = actualEndDate;
+        this.totalBudget = totalBudget;
+        this.description = description;
+        this.manager = manager;
+        this.status = status;
+        this.members = new LinkedHashSet<>(members);
+    }
+
+    public static Project create(
+            String name,
+            LocalDate startDate,
+            LocalDate expectedEndDate,
+            LocalDate actualEndDate,
+            BigDecimal totalBudget,
+            String description,
+            Member manager,
+            ProjectStatus status,
+            Set<Member> members
+    ) {
+        return new Project(
+                name,
+                startDate,
+                expectedEndDate,
+                actualEndDate,
+                totalBudget,
+                description,
+                manager,
+                status,
+                members
+        );
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getExpectedEndDate() {
+        return expectedEndDate;
+    }
+
+    public LocalDate getActualEndDate() {
+        return actualEndDate;
+    }
+
+    public BigDecimal getTotalBudget() {
+        return totalBudget;
+    }
+
+    public ProjectStatus getStatus() {
+        return status;
+    }
+
+    public Member getManager() {
+        return manager;
+    }
+
+    public Set<Member> getMembers() {
+        return Collections.unmodifiableSet(members);
     }
 }
