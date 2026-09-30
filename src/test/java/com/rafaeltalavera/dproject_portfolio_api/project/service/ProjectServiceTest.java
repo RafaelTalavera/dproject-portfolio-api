@@ -7,6 +7,9 @@ import com.rafaeltalavera.dproject_portfolio_api.project.domain.Project;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectStatus;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.CreateProjectRequest;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.ChangeProjectStatusRequest;
+import com.rafaeltalavera.dproject_portfolio_api.project.dto.ProjectQueryFilter;
+import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectRisk;
+import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectNotFoundException;
 import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectBusinessRuleException;
 import com.rafaeltalavera.dproject_portfolio_api.project.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.PageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -214,6 +218,39 @@ class ProjectServiceTest {
                 .hasMessage("Não é permitido excluir um projeto neste status.");
 
         verify(projectRepository, never()).delete(any(Project.class));
+    }
+
+    @Test
+    void shouldRejectFilterWithInvertedStartDateRange() {
+        ProjectQueryFilter filter = new ProjectQueryFilter(
+                null, null, null, LocalDate.of(2026, 11, 1), LocalDate.of(2026, 10, 1), ProjectRisk.LOW
+        );
+
+        assertThatThrownBy(() -> projectService.findAll(filter, PageRequest.of(0, 20)))
+                .isInstanceOf(ProjectBusinessRuleException.class)
+                .hasMessage("A data inicial do filtro nÃ£o pode ser posterior Ã  data final.");
+    }
+
+    @Test
+    void shouldRejectClosingBeforeProjectStartDate() {
+        Project project = project(ProjectStatus.IN_PROGRESS);
+        UUID projectId = UUID.randomUUID();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        assertThatThrownBy(() -> projectService.changeStatus(
+                projectId, new ChangeProjectStatusRequest(ProjectStatus.CLOSED, LocalDate.of(2026, 9, 30))
+        )).isInstanceOf(ProjectBusinessRuleException.class)
+                .hasMessage("A data real de tÃ©rmino deve ser igual ou posterior Ã  data de inÃ­cio.");
+    }
+
+    @Test
+    void shouldReportProjectNotFoundWhenChangingStatus() {
+        UUID projectId = UUID.randomUUID();
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> projectService.changeStatus(
+                projectId, new ChangeProjectStatusRequest(ProjectStatus.ANALYSIS_COMPLETED, null)
+        )).isInstanceOf(ProjectNotFoundException.class);
     }
 
     private CreateProjectRequest validRequest() {
