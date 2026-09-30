@@ -27,9 +27,22 @@ PostgreSQL, Flyway e Swagger/OpenAPI.
 No Windows, use `mvnw.cmd spring-boot:run`.
 
 As migrações Flyway são executadas automaticamente na inicialização. A interface
-Swagger será disponibilizada posteriormente junto com os endpoints da API.
+Swagger está disponível em `http://localhost:8081/swagger-ui/index.html`.
 O PostgreSQL do contêiner usa a porta 5432 internamente e é exposto na porta
 5433 do host por padrão, evitando conflito com instalações locais de PostgreSQL.
+
+## Autenticação
+
+O Swagger está disponível em `http://localhost:8081/swagger-ui/index.html`.
+Use o endpoint `POST /api/v1/auth/login` com as credenciais de demonstração:
+
+- Usuário: `portfolio.admin`
+- Senha: `password`
+
+O token retornado deve ser informado como `Bearer token` na autorização dos
+endpoints de negócio. A variável `PORTFOLIO_JWT_SECRET` do `.env` assina os
+tokens. O valor de exemplo serve apenas para desenvolvimento local e deve ser
+substituído em ambientes compartilhados ou de produção.
 
 ## Testes
 
