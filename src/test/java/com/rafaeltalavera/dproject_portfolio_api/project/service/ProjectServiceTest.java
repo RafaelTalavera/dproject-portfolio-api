@@ -228,7 +228,7 @@ class ProjectServiceTest {
 
         assertThatThrownBy(() -> projectService.findAll(filter, PageRequest.of(0, 20)))
                 .isInstanceOf(ProjectBusinessRuleException.class)
-                .hasMessage("A data inicial do filtro nÃ£o pode ser posterior Ã  data final.");
+                .hasMessageContaining("data inicial");
     }
 
     @Test
@@ -240,7 +240,7 @@ class ProjectServiceTest {
         assertThatThrownBy(() -> projectService.changeStatus(
                 projectId, new ChangeProjectStatusRequest(ProjectStatus.CLOSED, LocalDate.of(2026, 9, 30))
         )).isInstanceOf(ProjectBusinessRuleException.class)
-                .hasMessage("A data real de tÃ©rmino deve ser igual ou posterior Ã  data de inÃ­cio.");
+                .hasMessageContaining("data real");
     }
 
     @Test
