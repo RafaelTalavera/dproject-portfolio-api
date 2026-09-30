@@ -6,6 +6,7 @@ import com.rafaeltalavera.dproject_portfolio_api.member.integration.service.Memb
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.Project;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.ProjectStatus;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.CreateProjectRequest;
+import com.rafaeltalavera.dproject_portfolio_api.project.dto.ProjectQueryFilter;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.UpdateProjectRequest;
 import com.rafaeltalavera.dproject_portfolio_api.project.dto.ChangeProjectStatusRequest;
 import com.rafaeltalavera.dproject_portfolio_api.project.domain.policy.ProjectDeletionPolicy;
@@ -15,6 +16,8 @@ import com.rafaeltalavera.dproject_portfolio_api.project.exception.ProjectNotFou
 import com.rafaeltalavera.dproject_portfolio_api.project.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -69,6 +72,18 @@ public class ProjectService {
                 members
         );
         return projectRepository.save(project);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Project> findAll(ProjectQueryFilter filter, Pageable pageable) {
+        if (filter.startDateFrom() != null && filter.startDateTo() != null
+                && filter.startDateFrom().isAfter(filter.startDateTo())) {
+            throw new ProjectBusinessRuleException("A data inicial do filtro não pode ser posterior à data final.");
+        }
+        String name = filter.name() == null || filter.name().isBlank() ? null : filter.name().trim();
+        return projectRepository.findByFilter(name,
+                filter.status() == null ? null : filter.status().name(), filter.managerId(),
+                filter.startDateFrom(), filter.startDateTo(), filter.risk() == null ? null : filter.risk().name(), pageable);
     }
 
     @Transactional
