@@ -54,6 +54,8 @@ substituído em ambientes compartilhados ou de produção.
 
 ## API externa mockada de membros
 
+O mock disponibiliza `employee-001` e `employee-002` como funcion&aacute;rios, al&eacute;m de `consultant-001` como consultor para valida&ccedil;&otilde;es negativas.
+
 O Docker Compose também inicia uma API externa mockada de membros na porta
 `8083` por padrão. Ela representa o sistema que é a fonte de verdade para o
 cadastro de membros; a aplicação não disponibilizará CRUD local de membros.

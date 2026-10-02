@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/v1/members/employee-002"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "jsonBody": {
+      "id": "employee-002",
+      "name": "Carlos Mendes",
+      "assignment": "funcion\u00e1rio"
+    }
+  }
+}
