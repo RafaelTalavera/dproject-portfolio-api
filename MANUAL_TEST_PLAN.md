@@ -14,6 +14,10 @@ Esperado: login `200`; rota de neg&oacute;cio sem token retorna `401` e com toke
 
 ## Membros externos
 
+### Evid&ecirc;ncia de execu&ccedil;&atilde;o
+
+Em 2026-10-02, a associa&ccedil;&atilde;o positiva de membros foi validada manualmente. O projeto `691ef0dc-6edf-47e1-b9b9-67cff3dbf453` foi criado com `employee-001` como gerente e com `employee-001` e `employee-002` como membros. A resposta `201 Created` retornou ambos com atribui&ccedil;&atilde;o `funcion&aacute;rio`, preservou o gerente dentro da lista e calculou risco `LOW`.
+
 O mock fornece `employee-001` (funcion&aacute;rio) e `consultant-001` (consultor).
 
 Para validar um membro novo, crie-o diretamente em `POST http://localhost:8083/api/v1/members`, consulte o `id` retornado em `GET http://localhost:8083/api/v1/members/{id}` e use esse mesmo identificador na criação de um projeto. Um membro com atribuição `funcionário` deve ser aceito; `consultor` deve retornar `422`.
