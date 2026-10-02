@@ -108,4 +108,8 @@ Esperado: eventos `CREATED`, `UPDATED`, `MEMBERS_CHANGED`, `STATUS_CHANGED` e `D
 
 ## Registro
 
+### Resultado final
+
+Em 2026-10-02, todas as provas manuais deste roteiro foram conclu&iacute;das com sucesso. Foram validados autentica&ccedil;&atilde;o JWT, CRUD, persist&ecirc;ncia, filtros, pagina&ccedil;&atilde;o, riscos, membros externos, limites de aloca&ccedil;&atilde;o, fluxo de status, exclus&atilde;o, relat&oacute;rio e auditoria. Tamb&eacute;m foi confirmado que `actualEndDate` n&atilde;o &eacute; preenchida automaticamente e &eacute; obrigat&oacute;ria, com data v&aacute;lida, somente na transi&ccedil;&atilde;o para `CLOSED`.
+
 Para cada caso, registre data, endpoint, corpo resumido, status HTTP e resultado. Ao terminar, opcionalmente execute `docker compose --env-file .env.example down`.
