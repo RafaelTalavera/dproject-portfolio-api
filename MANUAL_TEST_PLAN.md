@@ -83,6 +83,10 @@ ANALYSIS -> ANALYSIS_COMPLETED -> ANALYSIS_APPROVED -> STARTED -> PLANNED -> IN_
 
 ## Limites, relat&oacute;rio e auditoria
 
+### Evid&ecirc;ncia de execu&ccedil;&atilde;o
+
+Em 2026-10-02, o cen&aacute;rio do limite de aloca&ccedil;&atilde;o foi validado manualmente com `employee-001`: havia tr&ecirc;s projetos no status `ANALYSIS` e um no status `CLOSED`. A tentativa seguinte de criar um quarto projeto ativo com esse membro foi rejeitada com `422`, como previsto. O projeto fechado n&atilde;o foi contabilizado como ativo.
+
 1. Crie tr&ecirc;s projetos ativos com `employee-001`; o quarto deve retornar `422`. Feche, cancele ou exclua um e confirme que uma nova aloca&ccedil;&atilde;o &eacute; aceita.
 2. Em `GET /api/v1/reports/portfolio-summary`, valide contagem/or&ccedil;amento por status, dura&ccedil;&atilde;o m&eacute;dia dos fechados e membros distintos.
 3. Confira auditoria no PostgreSQL:
